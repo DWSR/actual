@@ -1,0 +1,11 @@
+#!/bin/sh -eu
+
+echo Checking shell script formatting
+shfmt --indent=2 --diff --simplify --case-indent --space-redirects --keep-padding ./bin/*
+
+echo Checking shell script code smells
+shellcheck --check-sourced ./bin/*
+
+echo Checking app configuration
+yamllint fly.yaml
+fly config validate --config fly.yaml

@@ -1,0 +1,3 @@
+#!/bin/sh -eu
+
+fly deploy . --config fly.yaml --ha=false --now --remote-only --yes

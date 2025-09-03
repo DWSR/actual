@@ -1,0 +1,58 @@
+#!/bin/sh -eu
+
+cert_exists_for_hostname() {
+  hostname="${1}"
+
+  num_certs="$(fly certs list --json | jq "[.[] | select(.Hostname == \"${hostname}\")] | length")"
+
+  if [ "${num_certs}" = '1' ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+app_exists() {
+  num_apps="$(fly apps list --json | jq "[.[] | select(.Name == \"${FLY_APP}\")] | length")"
+
+  if [ "${num_apps}" = '1' ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+flycast_ip_exists() {
+  num_ips="$(fly ips list --json | jq '[.[] | select(.Type == "private_v6")] | length')"
+
+  if [ "${num_ips}" = '0' ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+if ! app_exists; then
+  echo Creating Fly.io app as it does not exist...
+  echo fly apps create "${FLY_APP}"
+else
+  echo Skipping creation of app as it already exists...
+fi
+
+if ! flycast_ip_exists; then
+  echo Creating Flycast IP for app as it does not exist...
+  echo fly ips allocate-v6 --private
+else
+  echo Skipping creation of Flycast IP as it already exists...
+fi
+
+if ! cert_exists_for_hostname 'budget.mcnama.family'; then
+  echo Creating cert for budget.mcnama.family as it does not exist...
+  echo fly certs create "${FLY_APP}"
+else
+  echo Skipping creation of cert for budget.mcnama.family as it already exists...
+fi
+
+flycast_ip="$(fly ips list --json | jq -r '.[] | select(.Type == "private_v6") | .Address')"
+
+echo "Flycast IP for ${FLY_APP}: ${flycast_ip}"

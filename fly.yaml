@@ -1,0 +1,62 @@
+---
+app: mc-actual
+primary_region: "yyz"
+
+build:
+  image: "docker.io/actualbudget/actual-server:sha-e8d93fb-alpine@sha256:b1f1bf1f00c7004672ddff9a1c9398b27b0aa423b96f2ed2ab569f2320aac0a6"
+
+runtime_options:
+  kill_signal: "SIGTERM"
+  kill_timeout: 30
+
+env:
+  PORT: "80"
+  TINI_SUBREAPER: "1"
+
+mounts:
+  - source: actual_data
+    destination: /data
+    initial_size: 1
+    snapshot_retention: 14
+    auto_extend_size_threshold: 90
+    auto_extend_size_increment: "1GB"
+    auto_extend_size_limit: "1GB"
+
+vm:
+  - cpus: 1
+    memory: 256
+    cpu_kind: shared
+    processes: [app]
+
+services:
+  http_checks:
+    - interval: 10000
+      grace_period: "10s"
+      method: "get"
+      path: "/health"
+      protocol: "http"
+      timeout: 2000
+  internal_port: 80
+  auto_start_machines: true
+  auto_stop_machines: "stop"
+  processes: [app]
+  protocol: "tcp"
+  ports:
+    - port: 80
+      handlers: ["http"]
+      force_https: true
+    - port: 443
+      internal_port: 80
+      handlers: ["tls", "http"]
+      tls_options:
+        alpn: ["http/1.1"]
+        versions: ["TLSv1.2", "TLSv1.3"]
+
+  concurrency:
+    type: "connections"
+    hard_limit: 100
+    soft_limit: 75
+
+experimental:
+  auto_rollback: true
+  cmd: ["node", "--max-old-space-size=180", "app.js"]
