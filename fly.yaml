@@ -3,7 +3,7 @@ app: mc-actual
 primary_region: "yyz"
 
 build:
-  image: "docker.io/actualbudget/actual-server:sha-e8d93fb-alpine@sha256:b1f1bf1f00c7004672ddff9a1c9398b27b0aa423b96f2ed2ab569f2320aac0a6"
+  image: "docker.io/actualbudget/actual-server:25.9.0-alpine@sha256:7b0ee6d9ae34d4f7dab95cec5bdd968cfe8e919f31d7bb9db98e37023ed4f798"
 
 runtime_options:
   kill_signal: "SIGTERM"

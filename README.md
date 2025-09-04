@@ -48,3 +48,4 @@ lint
 - [ ] CD via Github Actions
 - [ ] Add [prom exporter](https://github.com/sakowicz/actual-budget-prometheus-exporter) maybe?
 - [ ] Backups to another provider
+- [ ] Add [REST API](https://github.com/jhonderson/actual-http-api)
